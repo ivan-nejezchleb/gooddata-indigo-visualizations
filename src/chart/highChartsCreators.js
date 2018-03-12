@@ -11,13 +11,15 @@ import { getBarConfiguration } from './highcharts/barConfiguration';
 import { getColumnConfiguration } from './highcharts/columnConfiguration';
 import { getCustomizedConfiguration } from './highcharts/customConfiguration';
 import { getPieConfiguration } from './highcharts/pieConfiguration';
-import { LINE_CHART, BAR_CHART, COLUMN_CHART, PIE_CHART } from '../VisualizationTypes';
+import { getAreaConfiguration } from './highcharts/areaConfiguration';
+import { LINE_CHART, BAR_CHART, COLUMN_CHART, PIE_CHART, AREA_CHART } from '../VisualizationTypes';
 
 const chartConfigurationMap = {
     [LINE_CHART]: getLineConfiguration,
     [BAR_CHART]: getBarConfiguration,
     [COLUMN_CHART]: getColumnConfiguration,
-    [PIE_CHART]: getPieConfiguration
+    [PIE_CHART]: getPieConfiguration,
+    [AREA_CHART]: getAreaConfiguration
 };
 
 export function getHighchartsOptions(chartOptions, drillConfig) {

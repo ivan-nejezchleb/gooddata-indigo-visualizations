@@ -7,7 +7,7 @@ import {
     numberFormat
 } from '@gooddata/numberjs';
 
-import { BAR_CHART, COLUMN_CHART, LINE_CHART, PIE_CHART } from '../../VisualizationTypes';
+import { BAR_CHART, COLUMN_CHART, LINE_CHART, PIE_CHART, AREA_CHART } from '../../VisualizationTypes';
 import { HOVER_BRIGHTNESS, MINIMUM_HC_SAFE_BRIGHTNESS } from './commonConfiguration';
 import { getLighterColor } from '../../utils/color';
 
@@ -157,7 +157,7 @@ function formatTooltip(chartType, stacking, tooltipCallback) {
         return false;
     }
 
-    const dataPointEnd = (chartType === LINE_CHART)
+    const dataPointEnd = (chartType === LINE_CHART || chartType === AREA_CHART)
         ? this.point.plotX
         : getDataPointEnd(
             chartType,
@@ -167,7 +167,7 @@ function formatTooltip(chartType, stacking, tooltipCallback) {
             stacking
         );
 
-    const dataPointHeight = (chartType === LINE_CHART) ? 0 : this.point.shapeArgs.height;
+    const dataPointHeight = (chartType === LINE_CHART || chartType === AREA_CHART) ? 0 : this.point.shapeArgs.height;
 
     const arrowPosition = getArrowHorizontalPosition(
         chartType,
@@ -357,6 +357,7 @@ function getHoverStyles(chartOptions, config) {
             throw new Error(`Undefined chart type "${chartOptions.type}".`);
 
         case LINE_CHART:
+        case AREA_CHART:
             seriesMapFn = (seriesOrig) => {
                 const series = cloneDeep(seriesOrig);
 

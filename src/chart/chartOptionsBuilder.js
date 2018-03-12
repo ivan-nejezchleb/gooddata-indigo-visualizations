@@ -2,11 +2,11 @@
 import { colors2Object, numberFormat } from '@gooddata/numberjs';
 import invariant from 'invariant';
 
-import { range, get, without, escape, unescape } from 'lodash';
+import { range, get, without, escape, unescape, isBoolean } from 'lodash';
 import { parseValue, getAttributeElementIdFromAttributeElementUri } from '../utils/common';
 import { getMeasureUriOrIdentifier, isDrillable } from '../utils/drilldownEventing';
 import { DEFAULT_COLOR_PALETTE, getLighterColor } from '../utils/color';
-import { PIE_CHART, CHART_TYPES } from '../VisualizationTypes';
+import { PIE_CHART, CHART_TYPES, AREA_CHART, LINE_CHART } from '../VisualizationTypes';
 import { isDataOfReasonableSize } from './highChartsCreators';
 import { VIEW_BY_DIMENSION_INDEX, STACK_BY_DIMENSION_INDEX, PIE_CHART_LIMIT } from './constants';
 
@@ -377,6 +377,15 @@ function getCategories(type, viewByAttribute, measureGroup) {
     return [];
 }
 
+const getStacking = (stackByAttribute, type, config) => {
+    if (type === AREA_CHART) {
+        // stacking can by turned off by user
+        const stacking = isBoolean(config.stacking) ? config.stacking : true;
+        return stacking ? 'normal' : null;
+    }
+    return (stackByAttribute && type !== LINE_CHART) ? 'normal' : null;
+}
+
 /**
  * Creates an object providing data for all you need to render a chart except drillability.
  *
@@ -474,7 +483,7 @@ export function getChartOptions(
 
     return {
         type,
-        stacking: (stackByAttribute && type !== 'line') ? 'normal' : null,
+        stacking: getStacking(stackByAttribute, type, config),
         legendLayout: config.legendLayout || 'horizontal',
         colorPalette,
         title: {

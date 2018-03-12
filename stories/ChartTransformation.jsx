@@ -72,7 +72,8 @@ class DynamicChart extends React.Component {
             'column',
             'bar',
             'line',
-            'pie'
+            'pie',
+            'area'
         ];
 
         this.state = {
@@ -487,6 +488,33 @@ storiesOf('ChartTransformation', module)
                         legend: {
                             enabled: true,
                             position: 'left'
+                        },
+                        legendLayout: 'horizontal',
+                        colors: fixtures.customPalette
+                    }}
+                    {...dataSet}
+                    onDataTooLarge={f => f}
+                />
+            )
+        );
+    })
+    .add('Area chart with viewBy and stackBy attribute', () => {
+        const dataSet = fixtures.barChartWithStackByAndViewByAttributes;
+
+        return screenshotWrap(
+            wrap(
+                <ChartTransformation
+                    drillableItems={[
+                        {
+                            uri: dataSet.executionResult
+                                .headerItems[VIEW_BY_DIMENSION_INDEX][0][0].attributeHeaderItem.uri
+                        }
+                    ]}
+                    config={{
+                        type: 'area',
+                        legend: {
+                            enabled: true,
+                            position: 'right'
                         },
                         legendLayout: 'horizontal',
                         colors: fixtures.customPalette

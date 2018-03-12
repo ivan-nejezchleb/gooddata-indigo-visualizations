@@ -35,7 +35,8 @@ class DynamicVisualization extends React.Component {
             'column',
             'bar',
             'line',
-            'pie'
+            'pie',
+            'area'
         ];
 
         this.state = {
@@ -206,6 +207,37 @@ storiesOf('Visualization', module)
                     {...dataSet}
                     config={{
                         type: 'pie'
+                    }}
+                    onDataTooLarge={f => f}
+                />
+            )
+        );
+    })
+    .add('visualization area chart without other options', () => {
+        const dataSet = fixtures.barChartWith3MetricsAndViewByAttribute;
+
+        return screenshotWrap(
+            wrap(
+                <Visualization
+                    {...dataSet}
+                    config={{
+                        type: 'area'
+                    }}
+                    onDataTooLarge={f => f}
+                />
+            )
+        );
+    })
+    .add('visualization area chart with disabled stacking', () => {
+        const dataSet = fixtures.barChartWith3MetricsAndViewByAttribute;
+
+        return screenshotWrap(
+            wrap(
+                <Visualization
+                    {...dataSet}
+                    config={{
+                        type: 'area',
+                        stacking: false
                     }}
                     onDataTooLarge={f => f}
                 />

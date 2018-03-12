@@ -6,4 +6,5 @@ export const LINE_CHART = 'line';
 export const PIE_CHART = 'pie';
 export const DOUGHNUT_CHART = 'doughnut';
 export const HEADLINE = 'headline';
-export const CHART_TYPES = [TABLE, COLUMN_CHART, BAR_CHART, LINE_CHART, PIE_CHART, HEADLINE];
+export const AREA_CHART = 'area';
+export const CHART_TYPES = [TABLE, COLUMN_CHART, BAR_CHART, LINE_CHART, PIE_CHART, HEADLINE, AREA_CHART];

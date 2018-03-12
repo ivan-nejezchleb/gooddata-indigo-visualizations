@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { unescape } from 'lodash';
 import PropTypes from 'prop-types';
 
-import { LINE_CHART } from '../../VisualizationTypes';
+import { LINE_CHART, AREA_CHART } from '../../VisualizationTypes';
 
 const VISIBLE_COLOR = '#6D7680';
 const DISABLED_COLOR = '#CCCCCC';
@@ -27,7 +27,7 @@ export default class LegendItem extends Component {
     render() {
         const { item, chartType, width } = this.props;
 
-        const isLineChart = chartType === LINE_CHART;
+        const isLineChart = (chartType === LINE_CHART || chartType === AREA_CHART);
 
         const iconStyle = {
             borderRadius: isLineChart ? '50%' : 'none',
