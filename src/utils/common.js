@@ -10,7 +10,7 @@ import {
     LINE_CHART,
     PIE_CHART,
     AREA_CHART,
-    DOUGHNUT_CHART,
+    DONUT_CHART,
     HEADLINE,
     CHART_TYPES
 } from '../VisualizationTypes';
@@ -56,7 +56,8 @@ export const isBarChart = isEqual(BAR_CHART);
 export const isLineChart = isEqual(LINE_CHART);
 export const isPieChart = isEqual(PIE_CHART);
 export const isAreaChart = isEqual(AREA_CHART);
-export const isDoughnutChart = isEqual(DOUGHNUT_CHART);
+export const isDonutChart = isEqual(DONUT_CHART);
+export const isPieOrDonutChart = type => isPieChart(type) || isDonutChart(type);
 export const isHeadline = isEqual(HEADLINE);
 export const isChartSupported = type => CHART_TYPES.includes(type);
 export const stringifyChartTypes = () => CHART_TYPES.join(', ');

@@ -1,20 +1,48 @@
 // (C) 2007-2018 GoodData Corporation
 import Highcharts from 'highcharts';
+window.Highcharts=Highcharts;
+
+
+import * as HighchartsTreemap from 'highcharts/modules/treemap';
+import * as HighchartsMore from 'highcharts/highcharts-more';
+import * as HighchartsHeatmap from 'highcharts/modules/heatmap';
+import * as HighchartsBullet from 'highcharts/modules/bullet';
+import * as HighchartsWordCloud from 'highcharts/modules/wordcloud';
+import * as HighchartsFunnel from 'highcharts/modules/funnel';
+import * as HighchartsHistogram from 'highcharts/modules/histogram-bellcurve';
+import * as HighchartsPareto from 'highcharts/modules/pareto';
+
 import drillmodule from 'highcharts/modules/drilldown';
+//require('highcharts/modules/wordcloud.src')(Highchart);
+
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, set, isEqual, partial } from 'lodash';
 import cx from 'classnames';
 
-import { PIE_CHART } from '../VisualizationTypes';
+import { PIE_CHART, DONUT_CHART, HISTOGRAM_CHART, PARETO_CHART } from '../VisualizationTypes';
 import Chart from './Chart';
 import Legend from './legend/Legend';
 import { initChartPlugins } from './highcharts/chartPlugins';
 import { TOP, LEFT, BOTTOM, RIGHT } from './legend/PositionTypes';
 
+
 const CHART_TEXT_PADDING = 50;
 
+HighchartsMore(Highcharts);
+HighchartsTreemap(Highcharts);
+HighchartsHeatmap(Highcharts);
+HighchartsBullet(Highcharts);
+HighchartsWordCloud(Highcharts);
+HighchartsFunnel(Highcharts);
+HighchartsHistogram(Highcharts);
+HighchartsPareto(Highcharts);
+
 drillmodule(Highcharts);
+
+
+
+
 initChartPlugins(Highcharts, CHART_TEXT_PADDING);
 
 export function renderChart(props) {
@@ -147,13 +175,29 @@ export default class HighChartRenderer extends PureComponent {
     }
 
     createChartConfig(chartConfig, legendItemsEnabled) {
-        const config = cloneDeep(chartConfig);
+        var config = cloneDeep(chartConfig);
 
-        config.yAxis.title.style = {
-            ...config.yAxis.title.style,
-            textOverflow: 'ellipsis',
-            overflow: 'hidden'
-        };
+        if (config.yAxis.title)
+        {
+          config.yAxis.title.style = {
+              ...config.yAxis.title.style,
+              textOverflow: 'ellipsis',
+              overflow: 'hidden'
+          };
+        }
+        else
+        {
+          for(var i=0;i<config.yAxis.length;i++)
+          {
+            config.yAxis[i].title.style = {
+                ...config.yAxis[i].title.style,
+                textOverflow: 'ellipsis',
+                overflow: 'hidden'
+            };
+          } 
+        
+        }
+        
 
         if (this.props.height) {
             // fixed chart height is used in Dashboard mobile view
@@ -161,17 +205,45 @@ export default class HighChartRenderer extends PureComponent {
             config.chart.height = this.props.height;
         }
 
-        // render chart with disabled visibility based on legendItemsEnabled
-        const itemsPath = config.chart.type === PIE_CHART ? 'series[0].data' : 'series';
-        set(config, itemsPath, get(config, itemsPath).map((item, itemIndex) => {
-            const visible = legendItemsEnabled[itemIndex] !== undefined
-                ? legendItemsEnabled[itemIndex]
-                : true;
-            return {
-                ...item,
-                visible
-            };
-        }));
+        if (config.chart.type !== HISTOGRAM_CHART)
+        {
+            // render chart with disabled visibility based on legendItemsEnabled
+            const itemsPath = ((config.chart.type === PIE_CHART) || (config.chart.type === DONUT_CHART)) ? 'series[0].data' : 'series';
+            set(config, itemsPath, get(config, itemsPath).map((item, itemIndex) => {
+                const visible = legendItemsEnabled[itemIndex] !== undefined
+                    ? legendItemsEnabled[itemIndex]
+                    : true;
+                return {
+                    ...item,
+                    visible
+                };
+            }));
+        }
+        
+        
+
+        
+        /*
+        if (config.series[config.series.length-1].yAxis==1)
+        {
+           config.yAxis = [ config.yAxis, { opposite: true, title: { text: "", style: config.yAxis.title.style}, labels: config.yAxis.labels } ];
+           
+           if (config.series.length==2)
+           {
+             config.yAxis[0].title.text=config.series[0].name;
+             config.yAxis[1].title.text=config.series[1].name;
+           }
+           else
+           {
+             config.yAxis[0].title.text='Columns';
+             config.yAxis[1].title.text='Lines';
+           }
+        }*/
+        
+      
+        
+                
+        
         return config;
     }
 
@@ -204,6 +276,8 @@ export default class HighChartRenderer extends PureComponent {
             config: this.createChartConfig(this.props.hcOptions, this.state.legendItemsEnabled),
             callback: this.props.afterRender
         };
+        console.log(chartProps.config);
+        //console.log(JSON.stringify(chartProps.config));
         return this.props.chartRenderer(chartProps);
     }
 

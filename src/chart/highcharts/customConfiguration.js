@@ -7,7 +7,9 @@ import {
     numberFormat
 } from '@gooddata/numberjs';
 
-import { BAR_CHART, COLUMN_CHART, LINE_CHART, PIE_CHART, AREA_CHART } from '../../VisualizationTypes';
+import styleVariables from '../../styles/variables';
+
+import { BAR_CHART, COLUMN_CHART, LINE_CHART, PIE_CHART, DONUT_CHART, AREA_CHART, COLUMN_LINE_CHART, COLUMN_AREA_CHART, TREEMAP_CHART, HEATMAP_CHART, WORDCLOUD_CHART, SCATTER_CHART, BULLET_CHART, BUBBLE_CHART, WATERFALL_CHART, FUNNEL_CHART, HISTOGRAM_CHART, PARETO_CHART } from '../../VisualizationTypes';
 import { HOVER_BRIGHTNESS, MINIMUM_HC_SAFE_BRIGHTNESS } from './commonConfiguration';
 import { getLighterColor } from '../../utils/color';
 import {
@@ -52,15 +54,25 @@ function formatAsPercent() {
 }
 
 function getShowInPercentConfiguration(chartOptions) {
-    const { showInPercent } = chartOptions;
+    const { showInPercent, showInPercentX } = chartOptions;
 
-    return showInPercent ? {
+    const y = showInPercent ? {
         yAxis: {
             labels: {
                 formatter: formatAsPercent
             }
         }
     } : {};
+
+    const x = showInPercentX ? {
+        xAxis: {
+            labels: {
+                formatter: formatAsPercent
+            }
+        }
+    } : {};
+
+    return merge(x, y);
 }
 
 function getArrowAlignment(arrowPosition, chartWidth) {
@@ -163,7 +175,7 @@ function formatTooltip(chartType, stacking, tooltipCallback) {
         return false;
     }
 
-    const dataPointEnd = (isLineChart(chartType) || isAreaChart(chartType))
+    const dataPointEnd = (isLineChart(chartType) || isAreaChart(chartType) || (!this.point.tooltipPos))
         ? this.point.plotX
         : getDataPointEnd(
             chartType,
@@ -173,7 +185,9 @@ function formatTooltip(chartType, stacking, tooltipCallback) {
             stacking
         );
 
-    const dataPointHeight = (isLineChart(chartType) || isAreaChart(chartType)) ? 0 : this.point.shapeArgs.height;
+    const dataPointHeight = (isLineChart(chartType)
+                            || isAreaChart(chartType)
+                            || (!this.point.shapeArgs)) ? 0 : this.point.shapeArgs.height;
 
     const arrowPosition = getArrowHorizontalPosition(
         chartType,
@@ -222,6 +236,11 @@ function labelFormatter() {
     return formatLabel(this.y, get(this, 'point.format'));
 }
 
+function funnelLabelFormatter() {
+    return `${get(this, 'point.name')}<br>${formatLabel(this.y, get(this, 'point.format'))}`;
+}
+
+
 // check whether series contains only positive values, not consider nulls
 function hasOnlyPositiveValues(series, x) {
     return every(series, (seriesItem) => {
@@ -256,6 +275,10 @@ function getTooltipConfiguration(chartOptions) {
     } : {};
 }
 
+function bulletLabelFormatter() {
+    return formatLabel(this.point.y, this.series.userOptions.formatGD);
+}
+
 function getLabelsConfiguration(chartOptions) {
     const style = chartOptions.stacking ? {
         color: '#ffffff',
@@ -284,6 +307,21 @@ function getLabelsConfiguration(chartOptions) {
             column: {
                 dataLabels: {
                     formatter: labelFormatter,
+                    style,
+                    allowOverlap: false
+                }
+
+            },
+            bullet: {
+                dataLabels: {
+                    formatter: bulletLabelFormatter,
+                    style,
+                    allowOverlap: false
+                }
+            },
+            funnel: {
+                dataLabels: {
+                    formatter: funnelLabelFormatter,
                     style,
                     allowOverlap: false
                 }
@@ -339,11 +377,126 @@ function getSeries(series, colorPalette = []) {
     });
 }
 
+function labelFormatterHeatMap(opt) {
+    return formatLabel(this.point.value, opt.formatGD);
+}
+
 function getDataConfiguration(chartOptions) {
     const data = chartOptions.data || EMPTY_DATA;
-    const series = getSeries(data.series, chartOptions.colorPalette);
-    const categories = map(data.categories, escapeAngleBrackets);
+    const { type } = chartOptions;
+    const series = (
+        (type === PARETO_CHART) ||
+        (type === HISTOGRAM_CHART) ||
+        (type === SCATTER_CHART) ||
+        (type === BUBBLE_CHART) ||
+        (type === BULLET_CHART) ||
+        (type === WORDCLOUD_CHART) ||
+        (type === HEATMAP_CHART) ||
+        (type === TREEMAP_CHART)
+    ) ? (data.series) : getSeries(data.series, chartOptions.colorPalette);
+    const categories = (
+        (type === PARETO_CHART) ||
+        (type === HISTOGRAM_CHART) ||
+        (type === HEATMAP_CHART) ||
+        (type === BULLET_CHART) ||
+        (type === WATERFALL_CHART)
+    ) ? data.categories : map(data.categories, escapeAngleBrackets);
 
+    if (type === WATERFALL_CHART) {
+        series[0].color = 'rgb(148,161,174)';
+    }
+
+    if (type === WORDCLOUD_CHART) {
+        return {
+            series,
+            xAxis: {
+                categories
+            }
+        };
+    }
+    if (type === HISTOGRAM_CHART) {
+        return {
+            series
+        };
+    }
+
+    if (type === PARETO_CHART) {
+        return {
+            series,
+            xAxis: { categories: categories[0] || [] }
+        };
+    }
+
+
+    if (type === BULLET_CHART) {
+        return {
+            series,
+            categories,
+            xAxis: {
+                labels: {
+                    enabled: !isEmpty(compact(categories))
+                },
+                categories: categories[0] || []
+            },
+            yAxis: { plotBands: data.bands[0] ? data.bands[0] : [],
+                softMax: (data.bands[0].length > 0) ? data.bands[0][data.bands[0].length - 1].to : 0
+            }
+
+        };
+    }
+    if (type === TREEMAP_CHART) {
+        /*
+      series[0].data=series[0].data.map((point,indexPoint) => {
+        return { name: categories[indexPoint],
+                 value: point.y,
+                 format: point.format
+               };
+      });
+      */
+
+
+        return {
+            series
+        };
+    }
+
+    if (chartOptions.type === HEATMAP_CHART) {
+        return {
+            series,
+            xAxis: {
+                labels: {
+                    enabled: !isEmpty(compact(categories))
+                },
+                categories: categories[0] || []
+            },
+            yAxis: {
+                labels: {
+                    enabled: !isEmpty(compact(categories))
+                },
+                categories: categories[1] || []
+            },
+            plotOptions: {
+                heatmap:
+            {
+                dataLabels: {
+                    formatter: labelFormatterHeatMap
+                }
+            }
+            }
+
+        };
+    }
+
+    if (chartOptions.type === SCATTER_CHART) {
+        return {
+            series
+        };
+    }
+    if (chartOptions.type === BUBBLE_CHART) {
+        return {
+            series
+        };
+    }
     return {
         series,
         xAxis: {
@@ -378,8 +531,16 @@ function getHoverStyles(chartOptions, config) {
             };
             break;
 
+        case PARETO_CHART:
+        case HISTOGRAM_CHART:
+        case WATERFALL_CHART:
         case BAR_CHART:
         case COLUMN_CHART:
+        case COLUMN_LINE_CHART:
+        case COLUMN_AREA_CHART:
+        case BULLET_CHART:
+        case SCATTER_CHART:
+        case BUBBLE_CHART:
             seriesMapFn = (seriesOrig) => {
                 const series = cloneDeep(seriesOrig);
 
@@ -390,7 +551,12 @@ function getHoverStyles(chartOptions, config) {
             };
             break;
 
+        case FUNNEL_CHART:
         case PIE_CHART:
+        case DONUT_CHART:
+        case TREEMAP_CHART:
+        case WORDCLOUD_CHART:
+        case HEATMAP_CHART:
             seriesMapFn = (seriesOrig) => {
                 const series = cloneDeep(seriesOrig);
 
@@ -418,6 +584,63 @@ function getHoverStyles(chartOptions, config) {
     };
 }
 
+
+function getDualAxis(chartOptions, inConfig) {
+    const outConfig = cloneDeep(inConfig);
+    const axisStyle = {
+        gridLineColor: '#ebebeb',
+        labels: {
+            style: {
+                color: styleVariables.gdColorStateBlank,
+                font: '12px Avenir, "Helvetica Neue", Arial, sans-serif'
+            }
+        },
+        title: {
+            margin: 15,
+            style: {
+                color: styleVariables.gdColorLink,
+                font: '14px Avenir, "Helvetica Neue", Arial, sans-serif'
+            }
+        }
+    };
+
+
+    if (chartOptions.dualAxis) {
+        outConfig.yAxis = [axisStyle, merge({ opposite: true }, axisStyle)];
+
+        if (outConfig.series.length == 2) {
+            outConfig.yAxis[0].title.text = outConfig.series[0].name;
+            outConfig.yAxis[1].title.text = outConfig.series[1].name;
+        } else {
+            outConfig.yAxis[0].title.text = 'Columns';
+            outConfig.yAxis[1].title.text = 'Lines';
+        }
+        if (chartOptions.showInPercentMeasures) outConfig.yAxis[0].labels.formatter = formatAsPercent;
+        if (chartOptions.showInPercentSecondary) outConfig.yAxis[1].labels.formatter = formatAsPercent;
+    }
+
+    if (chartOptions.type === PARETO_CHART) {
+        outConfig.yAxis = [
+            merge(
+                {
+                    title: { text: outConfig.series[1].name, style: outConfig.yAxis.title.style }
+                }, axisStyle),
+            merge({
+                opposite: true,
+                title: { text: outConfig.series[0].name, style: outConfig.yAxis.title.style },
+                minPadding: 0,
+                maxPadding: 0,
+                max: 100,
+                min: 0,
+                labels: {
+                    format: '{value}%'
+                }
+            }, axisStyle)];
+    }
+    return outConfig;
+}
+
+
 export function getCustomizedConfiguration(chartOptions) {
     const configurators = [
         getTitleConfiguration,
@@ -426,7 +649,8 @@ export function getCustomizedConfiguration(chartOptions) {
         getLabelsConfiguration,
         getDataConfiguration,
         getTooltipConfiguration,
-        getHoverStyles
+        getHoverStyles,
+        getDualAxis
     ];
 
     const commonData = configurators.reduce((config, configurator) => {

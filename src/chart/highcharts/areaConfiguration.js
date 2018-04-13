@@ -1,6 +1,7 @@
+// (C) 2007-2018 GoodData Corporation
 import cloneDeep from 'lodash/cloneDeep';
 
-const LINE_WIDTH = 3;
+const AREA_LINE_WIDTH = 3;
 
 const AREA_TEMPLATE = {
     chart: {
@@ -8,18 +9,19 @@ const AREA_TEMPLATE = {
     },
     plotOptions: {
         area: {
-            lineWidth: 1
+            lineWidth: 1,
+            stacking: 'normal'
         },
         series: {
             marker: {
                 symbol: 'circle',
                 radius: 4.5
             },
-            lineWidth: LINE_WIDTH,
+            lineWidth: AREA_LINE_WIDTH,
             fillOpacity: 0.6,
             states: {
                 hover: {
-                    lineWidth: LINE_WIDTH + 1
+                    lineWidth: AREA_LINE_WIDTH + 1
                 }
             },
             dataLabels: {

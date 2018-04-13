@@ -97,7 +97,8 @@ export default class ChartTransformation extends Component {
             executionResult: { data, headerItems },
             config,
             onDataTooLarge,
-            onNegativeValues
+            onNegativeValues,
+            mdObject
         } = props;
 
         this.chartOptions = getChartOptions(
@@ -107,7 +108,8 @@ export default class ChartTransformation extends Component {
             data,
             headerItems,
             config,
-            drillableItems
+            drillableItems,
+            mdObject
         );
         const validationResult = validateData(config.limits, this.chartOptions);
 
