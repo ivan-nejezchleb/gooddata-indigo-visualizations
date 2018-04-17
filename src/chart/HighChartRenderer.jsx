@@ -1,8 +1,9 @@
 // (C) 2007-2018 GoodData Corporation
 import Highcharts from 'highcharts';
-window.Highcharts=Highcharts;
 
+window.Highcharts = Highcharts;
 
+/*
 import * as HighchartsTreemap from 'highcharts/modules/treemap';
 import * as HighchartsMore from 'highcharts/highcharts-more';
 import * as HighchartsHeatmap from 'highcharts/modules/heatmap';
@@ -11,9 +12,19 @@ import * as HighchartsWordCloud from 'highcharts/modules/wordcloud';
 import * as HighchartsFunnel from 'highcharts/modules/funnel';
 import * as HighchartsHistogram from 'highcharts/modules/histogram-bellcurve';
 import * as HighchartsPareto from 'highcharts/modules/pareto';
+*/
+
+import { default as HighchartsTreemap } from 'highcharts/modules/treemap';
+import { default as HighchartsMore } from 'highcharts/highcharts-more';
+import { default as HighchartsHeatmap } from 'highcharts/modules/heatmap';
+import { default as HighchartsBullet } from 'highcharts/modules/bullet';
+import { default as HighchartsWordCloud } from 'highcharts/modules/wordcloud';
+import { default as HighchartsFunnel } from 'highcharts/modules/funnel';
+import { default as HighchartsHistogram } from 'highcharts/modules/histogram-bellcurve';
+import { default as HighchartsPareto } from 'highcharts/modules/pareto';
 
 import drillmodule from 'highcharts/modules/drilldown';
-//require('highcharts/modules/wordcloud.src')(Highchart);
+// require('highcharts/modules/wordcloud.src')(Highchart);
 
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
@@ -39,8 +50,6 @@ HighchartsHistogram(Highcharts);
 HighchartsPareto(Highcharts);
 
 drillmodule(Highcharts);
-
-
 
 
 initChartPlugins(Highcharts, CHART_TEXT_PADDING);
@@ -175,29 +184,24 @@ export default class HighChartRenderer extends PureComponent {
     }
 
     createChartConfig(chartConfig, legendItemsEnabled) {
-        var config = cloneDeep(chartConfig);
+        const config = cloneDeep(chartConfig);
 
-        if (config.yAxis.title)
-        {
-          config.yAxis.title.style = {
-              ...config.yAxis.title.style,
-              textOverflow: 'ellipsis',
-              overflow: 'hidden'
-          };
-        }
-        else
-        {
-          for(var i=0;i<config.yAxis.length;i++)
-          {
-            config.yAxis[i].title.style = {
-                ...config.yAxis[i].title.style,
+        if (config.yAxis.title) {
+            config.yAxis.title.style = {
+                ...config.yAxis.title.style,
                 textOverflow: 'ellipsis',
                 overflow: 'hidden'
             };
-          } 
-        
+        } else {
+            for (let i = 0; i < config.yAxis.length; i++) {
+                config.yAxis[i].title.style = {
+                    ...config.yAxis[i].title.style,
+                    textOverflow: 'ellipsis',
+                    overflow: 'hidden'
+                };
+            }
         }
-        
+
 
         if (this.props.height) {
             // fixed chart height is used in Dashboard mobile view
@@ -205,8 +209,7 @@ export default class HighChartRenderer extends PureComponent {
             config.chart.height = this.props.height;
         }
 
-        if (config.chart.type !== HISTOGRAM_CHART)
-        {
+        if (config.chart.type !== HISTOGRAM_CHART) {
             // render chart with disabled visibility based on legendItemsEnabled
             const itemsPath = ((config.chart.type === PIE_CHART) || (config.chart.type === DONUT_CHART)) ? 'series[0].data' : 'series';
             set(config, itemsPath, get(config, itemsPath).map((item, itemIndex) => {
@@ -219,15 +222,13 @@ export default class HighChartRenderer extends PureComponent {
                 };
             }));
         }
-        
-        
 
-        
+
         /*
         if (config.series[config.series.length-1].yAxis==1)
         {
            config.yAxis = [ config.yAxis, { opposite: true, title: { text: "", style: config.yAxis.title.style}, labels: config.yAxis.labels } ];
-           
+
            if (config.series.length==2)
            {
              config.yAxis[0].title.text=config.series[0].name;
@@ -238,12 +239,9 @@ export default class HighChartRenderer extends PureComponent {
              config.yAxis[0].title.text='Columns';
              config.yAxis[1].title.text='Lines';
            }
-        }*/
-        
-      
-        
-                
-        
+        } */
+
+
         return config;
     }
 
@@ -277,7 +275,7 @@ export default class HighChartRenderer extends PureComponent {
             callback: this.props.afterRender
         };
         console.log(chartProps.config);
-        //console.log(JSON.stringify(chartProps.config));
+        // console.log(JSON.stringify(chartProps.config,null,' '));
         return this.props.chartRenderer(chartProps);
     }
 

@@ -17,6 +17,7 @@ import {
 
 import { getMeasureUriOrIdentifier, isDrillable } from '../utils/drilldownEventing';
 import { DEFAULT_COLOR_PALETTE, getLighterColor } from '../utils/color';
+import { PIE_CHART, DONUT_CHART, COLUMN_LINE_CHART, COLUMN_AREA_CHART, SCATTER_CHART, HEATMAP_CHART, TREEMAP_CHART, BUBBLE_CHART, WORDCLOUD_CHART, BULLET_CHART, WATERFALL_CHART, FUNNEL_CHART, HISTOGRAM_CHART, PARETO_CHART, DUAL_AXIS_CHART, CHART_TYPES } from '../VisualizationTypes';
 import { isDataOfReasonableSize } from './highChartsCreators';
 import { VIEW_BY_DIMENSION_INDEX, STACK_BY_DIMENSION_INDEX, PIE_CHART_LIMIT } from './constants';
 
@@ -254,7 +255,7 @@ export function generateTooltipHeatMapFn(viewByAttribute,stackByAttribute, type)
     };
 
     return (point) => {
-        const formattedValue = customEscape(formatValue(point.value, point.format).label);
+        const formattedValue = customEscape(formatValue(point.value, point.series.userOptions.dataLabels.formatGD).label);
         const textData = [];
 
         textData.unshift([customEscape(point.series.name), formattedValue]);
@@ -880,10 +881,13 @@ export function getChartOptions(
         const seriesItem = {
             name: measureGroup.items[0].measureHeaderItem.name,
             data: data,
-            dataLabels: { enabled: (viewByAttribute && (viewByAttribute.items.length<=6)),
-                          formatGD: unwrap(measureGroup.items[0]).format
-                        },
+            turboThreshold: 0,
+            dataLabels: {
+                enabled: ((!viewByAttribute || (viewByAttribute.items.length <= 6)) && (!stackByAttribute || (stackByAttribute.items.length <= 20))),
+                formatGD: unwrap(measureGroup.items[0]).format
+            },
             legendIndex: 0,
+            borderWidth: ((!viewByAttribute || (viewByAttribute.items.length <= 30)) && (!stackByAttribute || (stackByAttribute.items.length <= 30))) ? 1 : 0,
             color: colorPalette[0]
         }
 
@@ -897,8 +901,8 @@ export function getChartOptions(
             legendLayout: 'horizontal',
             colorPalette,
             title: {
-                x: (viewByAttribute ? viewByAttribute.name : ''),
-                y: (stackByAttribute ? stackByAttribute.name : ''),
+                x: (viewByAttribute ? viewByAttribute.formOf.name : ''),
+                y: (stackByAttribute ? stackByAttribute.formOf.name : ''),
                 format: unwrap(measureGroup.items[0]).format
             },
             showInPercent: false,
@@ -1103,56 +1107,96 @@ if (type==BUBBLE_CHART)
     const yLabel = config.yLabel || (measureGroup.items.length === 1 ? unwrap(measureGroup.items[0]).name : '');
     const yFormat = config.yFormat || unwrap(measureGroup.items[0]).format;
 
-    if (type === COLUMN_LINE_CHART)
-    {
+    if (type === COLUMN_LINE_CHART) {
 
-        const secondary=measureBuckets.secondary;
-        var dualAxis=false;
-        if (measureBuckets.secondary)
-        {
-          measureBuckets.secondary.forEach((measureIndex) => {
-            series[measureIndex].type = 'line';
-
-            if (measureBuckets.measures)
-            {
-                series[measureIndex].yAxis = 1;
-                dualAxis=true;
-
-            }
-          })
+        const secondary = measureBuckets.secondary;
+        var dualAxis = false;
+        if (measureBuckets.secondary) {
+            measureBuckets.secondary.forEach((measureIndex) => {
+                series[measureIndex].type = 'line';
+            })
         }
 
         return {
-        type,
-        stacking: (stackByAttribute && type !== 'line') ? 'normal' : null,
-        legendLayout: config.legendLayout || 'horizontal',
-        colorPalette,
-        title: {
-            x: xLabel,
-            y: yLabel,
-            yFormat
-        },
-        dualAxis,
-        showInPercent: measureGroup.items.some((wrappedMeasure) => {
-            const measure = wrappedMeasure[Object.keys(wrappedMeasure)[0]];
-            return measure.format.includes('%');
-        }),
-        showInPercentMeasures: measureBuckets.measures && measureBuckets.measures.some((item) => {
-            const measure = unwrap(measureGroup.items[item]);
-            return measure.format.includes('%');
-        }),
-        showInPercentSecondary: measureBuckets.secondary && measureBuckets.secondary.some((item) => {
-            const measure = unwrap(measureGroup.items[item]);
-            return measure.format.includes('%');
-        }),
-        data: {
-            series,
-            categories
-        },
-        actions: {
-            tooltip: generateTooltipFn(viewByAttribute, type)
+            type,
+            stacking: (stackByAttribute && type !== 'line') ? 'normal' : null,
+            legendLayout: config.legendLayout || 'horizontal',
+            colorPalette,
+            title: {
+                x: xLabel,
+                y: yLabel,
+                yFormat
+            },
+            dualAxis,
+            showInPercent: measureGroup.items.some((wrappedMeasure) => {
+                const measure = wrappedMeasure[Object.keys(wrappedMeasure)[0]];
+                return measure.format.includes('%');
+            }),
+            showInPercentMeasures: measureBuckets.measures && measureBuckets.measures.some((item) => {
+                const measure = unwrap(measureGroup.items[item]);
+                return measure.format.includes('%');
+            }),
+            showInPercentSecondary: measureBuckets.secondary && measureBuckets.secondary.some((item) => {
+                const measure = unwrap(measureGroup.items[item]);
+                return measure.format.includes('%');
+            }),
+            data: {
+                series,
+                categories
+            },
+            actions: {
+                tooltip: generateTooltipFn(viewByAttribute, type)
+            }
+        };
+    }
+
+    if (type === DUAL_AXIS_CHART) {
+
+        const secondary = measureBuckets.secondary;
+        var dualAxis = false;
+        if (measureBuckets.secondary) {
+            measureBuckets.secondary.forEach((measureIndex) => {
+                series[measureIndex].type = 'line';
+
+                if (measureBuckets.measures) {
+                    series[measureIndex].yAxis = 1;
+                    dualAxis = true;
+
+                }
+            })
         }
-    };
+
+        return {
+            type,
+            stacking: (stackByAttribute && type !== 'line') ? 'normal' : null,
+            legendLayout: config.legendLayout || 'horizontal',
+            colorPalette,
+            title: {
+                x: xLabel,
+                y: yLabel,
+                yFormat
+            },
+            dualAxis,
+            showInPercent: measureGroup.items.some((wrappedMeasure) => {
+                const measure = wrappedMeasure[Object.keys(wrappedMeasure)[0]];
+                return measure.format.includes('%');
+            }),
+            showInPercentMeasures: measureBuckets.measures && measureBuckets.measures.some((item) => {
+                const measure = unwrap(measureGroup.items[item]);
+                return measure.format.includes('%');
+            }),
+            showInPercentSecondary: measureBuckets.secondary && measureBuckets.secondary.some((item) => {
+                const measure = unwrap(measureGroup.items[item]);
+                return measure.format.includes('%');
+            }),
+            data: {
+                series,
+                categories
+            },
+            actions: {
+                tooltip: generateTooltipFn(viewByAttribute, type)
+            }
+        };
     }
 
     if (type === COLUMN_AREA_CHART)

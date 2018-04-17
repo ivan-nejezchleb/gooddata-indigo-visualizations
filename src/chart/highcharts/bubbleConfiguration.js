@@ -10,7 +10,7 @@ const BUBBLE_TEMPLATE = {
         zoomType: 'xy'
     },
     plotOptions: {
-         bubble: {
+        bubble: {
             marker: {
                 radius: 5,
                 states: {
@@ -26,42 +26,48 @@ const BUBBLE_TEMPLATE = {
                         enabled: false
                     }
                 }
-            }
-       
-    
-        },
-      xAxis: {
-        title: {
-            enabled: true,
-            text: 'X'
-        },
-        labels: {
-            enabled: true
-        },
-        startOnTick: true,
-        endOnTick: true,
-        showLastLabel: true
-      },
-      yAxis: {
-          title: {
-              text: 'Y'
-          },
-          labels: {
-            enabled: true
-        }
-      }   
-    
-    }, 
-        series: {
-            states: {
-                hover: {
-                    enabled: false
+            },
+            dataLabels: {
+                color: 'rgb(0,0,0)',
+                borderWidth: 0,
+                shadow: false,
+                style: {
+                    fontWeight: 'normal',
+                    textOutline: 'none'
                 }
             }
+        },
+        xAxis: {
+            title: {
+                enabled: true,
+                text: 'X'
+            },
+            labels: {
+                enabled: true
+            },
+            startOnTick: true,
+            endOnTick: true,
+            showLastLabel: true
+        },
+        yAxis: {
+            title: {
+                text: 'Y'
+            },
+            labels: {
+                enabled: true
+            }
         }
-    
-}
-    
+
+    },
+    series: {
+        states: {
+            hover: {
+                enabled: false
+            }
+        }
+    }
+};
+
 
 export function getBubbleConfiguration() {
     return cloneDeep(BUBBLE_TEMPLATE);

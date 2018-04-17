@@ -30,8 +30,9 @@ import { getWaterfallConfiguration } from './highcharts/waterfallConfiguration';
 import { getFunnelConfiguration } from './highcharts/funnelConfiguration';
 import { getHistogramConfiguration } from './highcharts/histogramConfiguration';
 import { getParetoConfiguration } from './highcharts/paretoConfiguration';
+import { getDualAxisConfiguration } from './highcharts/dualAxisConfiguration';
 
-import { LINE_CHART, BAR_CHART, COLUMN_CHART, PIE_CHART, DONUT_CHART, AREA_CHART, COLUMN_LINE_CHART, COLUMN_AREA_CHART, TREEMAP_CHART, SCATTER_CHART, BULLET_CHART, WORDCLOUD_CHART, HEATMAP_CHART, BUBBLE_CHART, WATERFALL_CHART, FUNNEL_CHART, HISTOGRAM_CHART, PARETO_CHART } from '../VisualizationTypes';
+import { LINE_CHART, BAR_CHART, COLUMN_CHART, PIE_CHART, DONUT_CHART, AREA_CHART, COLUMN_LINE_CHART, COLUMN_AREA_CHART, TREEMAP_CHART, SCATTER_CHART, BULLET_CHART, WORDCLOUD_CHART, HEATMAP_CHART, BUBBLE_CHART, WATERFALL_CHART, FUNNEL_CHART, HISTOGRAM_CHART, PARETO_CHART, DUAL_AXIS_CHART } from '../VisualizationTypes';
 
 const chartConfigurationMap = {
     [LINE_CHART]: getLineConfiguration,
@@ -51,7 +52,8 @@ const chartConfigurationMap = {
     [WATERFALL_CHART]: getWaterfallConfiguration,
     [FUNNEL_CHART]: getFunnelConfiguration,
     [HISTOGRAM_CHART]: getHistogramConfiguration,
-    [PARETO_CHART]: getParetoConfiguration
+    [PARETO_CHART]: getParetoConfiguration,
+    [DUAL_AXIS_CHART]: getDualAxisConfiguration
 };
 
 export function getHighchartsOptions(chartOptions, drillConfig) {

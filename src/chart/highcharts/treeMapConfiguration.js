@@ -3,12 +3,13 @@ import cloneDeep from 'lodash/cloneDeep';
 
 const TREEMAP_TEMPLATE = {
     chart: {
-        type: "treemap",
+        type: 'treemap'
     },
     plotOptions: {
         treemap: {
             dataLabels: {
-                enabled: true
+                enabled: true,
+                color: 'rgb(255,255,255)'
             },
             showInLegend: true
         }
